@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class Tile {
-  final String label;
+  final int order;
 
-  Tile({@required this.label});
+  Tile({@required this.order});
 
   @override
   toString() {
-    return label;
+    return '$order';
   }
 }

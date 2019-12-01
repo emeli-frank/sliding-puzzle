@@ -65,7 +65,7 @@ class TileWidget extends StatelessWidget {
             child: Image.asset('assets/images/tiles/wood/tile_$order.png'),
           ),
           onTap: () {
-            gameProvider.move(currentPosition);
+            gameProvider.move(currentPosition, playSound: true);
             /*if (gameProvider.hasWonGame() && !gameProvider.gameStatus.isCompleted) {
               _neverSatisfied(context); // TODO:: remember this is an async method
             }*/

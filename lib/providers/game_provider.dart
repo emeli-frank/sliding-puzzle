@@ -19,9 +19,9 @@ class GameProvider with ChangeNotifier {
   int moveCount = 0;
 
   GameProvider() {
-    // Create tiles
+    // Create tiles and add them in order
     for(int y = 0; y < _tilePositions.length; y ++) {
-      for(int x = 0; x < 4; x ++) {
+      for(int x = 0; x < _tilePositions.length; x ++) {
         _tilePositions[y].add(Tile(order: (y * 4) + (x + 1)));
       }
     }
@@ -30,17 +30,18 @@ class GameProvider with ChangeNotifier {
 
     gameStatus.isCompleted = false;
     shuffleTiles();
-    moveCount = 0;
-
-    /*for (int i = 0; i < 500; i++) {
-      shuffleTiles();
-    }*/
   }
 
-  AxisDirection _canMove(Position touchedTilePosition) { // todo: rename to _getMoveDirection
-    List<Position> verticalPositions = [];
-    List<Position> horizontalPositions = [];
+  AxisDirection _getMoveDirection(Position touchedTilePosition) {
+    /*
+    * Returns move direction or nil if it cannot move
+    * This function can secondarily be used to find out if a tile can move
+    */
 
+    List<Position> verticalPositions = []; // holds clicked tile including tiles at it's left and right
+    List<Position> horizontalPositions = []; // holds clicked tile including tiles at it's top and bottom
+
+    // add clicked tile including those at it's left and right to the horizontalPositions list
     for (int x = 0; x < 4; x++) {
       horizontalPositions.add(Position(
         x: x,
@@ -48,6 +49,7 @@ class GameProvider with ChangeNotifier {
       ));
     }
 
+    // add clicked tile including those at it's top and bottom to the verticalPositions list
     for (int y = 0; y < 4; y++) {
       verticalPositions.add(Position(
           x: touchedTilePosition.x,
@@ -55,20 +57,17 @@ class GameProvider with ChangeNotifier {
       ));
     }
 
-    Position emptyPosition = emptyPositionLocation();
+    Position emptyPosition = getEmptyPosition();
 
     for (Position horizontalPosition in horizontalPositions) {
       if (horizontalPosition.y == emptyPosition.y) {
 
-        /*print('${touchedTilePosition.x} - ${emptyPosition.x}'
-            ' = ${(touchedTilePosition.x - emptyPosition.x)}');*/
-
         if ((touchedTilePosition.x - emptyPosition.x).isNegative) {
-          print('left to right');
+          // tile movement is left to right
           return AxisDirection.leftToRight;
         }
         else {
-          print('right to left');
+          // tile movement is right to left
           return AxisDirection.rightToLeft;
         }
       }
@@ -78,31 +77,34 @@ class GameProvider with ChangeNotifier {
       if (verticalPosition.x == emptyPosition.x) {
 
         if ((touchedTilePosition.y - emptyPosition.y).isNegative) {
-          print('top to bottom');
+          // tile movement is top to bottom
           return AxisDirection.topToBottom;
         }
         else {
-          print('bottom to top');
+          // tile movement is bottom to top
           return AxisDirection.bottomToTop;
         }
       }
     }
 
-    print('nil');
     return AxisDirection.nil;
   }
 
-  bool move(Position touchedTilePosition) {
+  bool move(Position touchedTilePosition, {bool playSound = false}) {
     if (gameStatus.isCompleted)
       return false;
 
-    Position emptyPosition = emptyPositionLocation();
+    Position emptyPosition = getEmptyPosition();
     List<Position> positions = [];
 
-    final AudioCache player = AudioCache(prefix: 'sounds/');
+//    final AudioCache player = AudioCache(prefix: 'sounds/');
 
-    if (_canMove(touchedTilePosition) == AxisDirection.leftToRight) {
-      // player.play('pop.mp3');
+    if (_getMoveDirection(touchedTilePosition) == AxisDirection.nil) {
+      // tile can't be moved
+      return false;
+    }
+
+    if (_getMoveDirection(touchedTilePosition) == AxisDirection.leftToRight) {
       for (int x = 0; x < 4; x++) {
         if (x >= touchedTilePosition.x && x <= emptyPosition.x) {
           positions.add(Position(
@@ -122,9 +124,9 @@ class GameProvider with ChangeNotifier {
 
       notifyListeners();
     }
-    else if (_canMove(touchedTilePosition) == AxisDirection.rightToLeft) {
-      // player.play('pop.mp3');
+    else if (_getMoveDirection(touchedTilePosition) == AxisDirection.rightToLeft) {
       for (int x = 0; x < 4; x++) {
+        // TODO:: Add helpful comment
         if (x <= touchedTilePosition.x && x >= emptyPosition.x) {
           positions.add(Position(
             x: x,
@@ -133,6 +135,7 @@ class GameProvider with ChangeNotifier {
         }
       }
 
+      // Get number of times to call swap function
       int noOfSwaps = positions.length - 1;
       List<Position> reversedPositions = positions.reversed.toList();
 
@@ -144,8 +147,7 @@ class GameProvider with ChangeNotifier {
 
       notifyListeners();
     }
-    else if (_canMove(touchedTilePosition) == AxisDirection.topToBottom) {
-      // player.play('pop.mp3');
+    else if (_getMoveDirection(touchedTilePosition) == AxisDirection.topToBottom) {
       for (int y = 0; y < 4; y++) {
         if (y >= touchedTilePosition.y && y <= emptyPosition.y) {
           positions.add(Position(
@@ -165,8 +167,7 @@ class GameProvider with ChangeNotifier {
 
       notifyListeners();
     }
-    else if (_canMove(touchedTilePosition) == AxisDirection.bottomToTop) {
-      // player.play('pop.mp3');
+    else if (_getMoveDirection(touchedTilePosition) == AxisDirection.bottomToTop) {
       for (int y = 0; y < 4; y++) {
         if (y <= touchedTilePosition.y && y >= emptyPosition.y) {
           positions.add(Position(
@@ -187,17 +188,19 @@ class GameProvider with ChangeNotifier {
 
       notifyListeners();
     }
-    else {
-      print("Tile can't be moved");
-      return false;
-    }
+
+    /*if (playSound != true) {
+      print("PRINTING PLAY SOUND");
+      print(playSound);
+      player.play('pop.mp3');
+    }*/
 
     moveCount++;
     return true;
   }
 
   // method is problematic
-  bool hasWonGame() {
+  bool hasWonGame() { // TODO:: rename
     int next = 1;
 
     for (int y = 0; y < tilePositions.length; y++) {
@@ -210,13 +213,11 @@ class GameProvider with ChangeNotifier {
             return false;
           }
           else {
-            print('tile is not null');
             if (tilePositions[y][x].order == next++) {
               print(tilePositions[y][x].order);
               continue;
             }
             else {
-              print('You have not won the game');
               gameStatusText = '$moveCount move(s)';
               notifyListeners();
               return false;
@@ -224,7 +225,6 @@ class GameProvider with ChangeNotifier {
           }
         }
         else {
-          print('You have won');
           gameStatus.isCompleted = true;
           gameStatusText = 'You have won the game in $moveCount move(s)';
           notifyListeners();
@@ -244,38 +244,38 @@ class GameProvider with ChangeNotifier {
 
   void shuffleTiles() {
     final random = Random();
-    int count = 0;
 
     for (int i = 0; i < 500; i++) {
-      Position emptyPosition = emptyPositionLocation();
-      print('shuffled ${++count} times');
-      print(tilePositions[0]);
-      print(tilePositions[1]);
-      print(tilePositions[2]);
-      print(tilePositions[3]);
-      bool horizontal = (random.nextInt(2) == 1) ? true : false;
-      int x;
-      int y;
+      Position emptyPosition = getEmptyPosition();
+      ShuffleDirection shuffleDirection = (random.nextInt(2) == 1)
+          ? ShuffleDirection.horizontal
+          : ShuffleDirection.vertical;
 
-      if (horizontal) {
+      int x, y; // positions to move to
+
+      if (shuffleDirection == ShuffleDirection.horizontal) {
+        // get random x position that is not empty
         do {
           x = random.nextInt(4);
         } while (x == emptyPosition.x);
 
+        // set y to the row that has the empty slot (so that it can move)
         y = emptyPosition.y;
       }
       else {
+        // get random y position that is not empty
          do {
           y = random.nextInt(4);
         } while (y == emptyPosition.y);
 
+         // set x to the column that has the empty slot (so that it can move)
         x = emptyPosition.x;
       }
 
-      print('moving ${Position(x: x, y: y)}');
-
       move(Position(x: x, y: y));
     }
+
+    moveCount = 0;
   }
 
   void _swapTiles(Position tile, Position empty) {
@@ -284,7 +284,7 @@ class GameProvider with ChangeNotifier {
     _tilePositions[empty.y][empty.x] = temp;
   }
 
-  Position emptyPositionLocation() {
+  Position getEmptyPosition() {
     Position position;
 
     for (int y = 0; y < _tilePositions.length; y++) {
@@ -309,28 +309,6 @@ class GameProvider with ChangeNotifier {
       'y': boardWidth * (position.y) / 4,
     };
   }
-
-  /*void _shuffleTiles() {
-    const int noOfTimesToShuffle = 500;
-
-    for (int i = 0; i < noOfTimesToShuffle; i++) {
-      List<Position> movableTiles = [];
-
-      for (int y = 0; y < tilePositions.length; y++) {
-        for (int x = 0; x < tilePositions[y].length; x++) {
-          if (_canMove(Position(x: x, y: y))) {
-            movableTiles.add(Position(x: x, y: y));
-          }
-        }
-      }
-
-      // print(movableTiles);
-
-      final _random = Random();
-      var randomMove = movableTiles[_random.nextInt(movableTiles.length)];
-      move(randomMove);
-    }
-  }*/
 
   Map<String, double> getAlignment({@required Position position}) {
     double getCoordinate(value) {
@@ -365,3 +343,8 @@ enum AxisDirection {
   nil,
 }
 
+
+enum ShuffleDirection {
+  horizontal,
+  vertical,
+}

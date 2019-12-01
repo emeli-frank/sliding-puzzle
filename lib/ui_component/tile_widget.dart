@@ -66,9 +66,10 @@ class TileWidget extends StatelessWidget {
           ),
           onTap: () {
             gameProvider.move(currentPosition);
-            if (gameProvider.hasWonGame()) {
+            /*if (gameProvider.hasWonGame() && !gameProvider.gameStatus.isCompleted) {
               _neverSatisfied(context); // TODO:: remember this is an async method
-            }
+            }*/
+            gameProvider.hasWonGame();
           },
         ),
       ),

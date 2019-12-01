@@ -6,5 +6,5 @@ class Position {
 
   Position({@required this.x, @required this.y});
 
-  @override toString() => 'x: $x, y: $y';
+  @override toString() => '{x: $x, y: $y}';
 }

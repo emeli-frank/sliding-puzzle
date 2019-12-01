@@ -63,7 +63,17 @@ class GameScreen extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                       flex: 1,
-                      child: SizedBox(width: 20.0)
+                      // child: SizedBox(width: 20.0)
+                    child: Center(
+                      child: Text(
+                        gameProvider.gameStatusText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   ),
                   Expanded(
                     flex: 4,
@@ -95,15 +105,25 @@ class GameScreen extends StatelessWidget {
                   ),
                   Expanded(
                     child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
                       child: Row(
                         children: <Widget>[
-                          /*FlatButton.icon(
-                          label: Text("shuffle"),
-                          icon: Icon(Icons.shuffle),
+                          FlatButton.icon(
+                            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal:20.0),
+                          label: Text("Restart"),
+                          icon: Icon(Icons.play_circle_filled),
                           onPressed: () {
-                            gameProvider.shuffleTiles();
+                            gameProvider.restartGame();
                           },
-                        ),*/
+                        ),
+                          FlatButton.icon(
+                            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal:20.0),
+                            label: Text("Turn off sound"),
+                            icon: Icon(Icons.music_note),
+                            onPressed: () {
+                              // gameProvider.toggleSound();
+                            },
+                          ),
                         ],
                       ),
                     ),

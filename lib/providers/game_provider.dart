@@ -17,6 +17,7 @@ class GameProvider with ChangeNotifier {
   final GameStatus gameStatus = GameStatus();
   String gameStatusText = '';
   int moveCount = 0;
+  int bestMoveCount = 0;
 
   GameProvider() {
     // Create tiles and arrange them without shuffling yet
@@ -96,14 +97,21 @@ class GameProvider with ChangeNotifier {
     return AxisDirection.nil;
   }
 
-  bool move(Position touchedTilePosition, {bool playSound = false}) {
+  // checks if a piece can move by trying to get it's move direction
+  // and moving it if it can
+  bool move(Position touchedTilePosition, {bool shuffling = false}) {
     if (gameStatus.isCompleted)
       return false;
 
     Position emptyPosition = getEmptyPosition();
     List<Position> positions = [];
 
-//    final AudioCache player = AudioCache(prefix: 'sounds/');
+    /*final AudioCache player = AudioCache(prefix: 'sounds/');
+    if (shuffling == false) {
+      print("PRINTING PLAY SOUND");
+      print(playSound);
+      player.play('pop.mp3');
+    }*/
 
     // return false if tile can't be moved
     if (_getMoveDirection(touchedTilePosition) == AxisDirection.nil) {
@@ -195,49 +203,56 @@ class GameProvider with ChangeNotifier {
       notifyListeners();
     }
 
-    /*if (playSound != true) {
-      print("PRINTING PLAY SOUND");
-      print(playSound);
-      player.play('pop.mp3');
-    }*/
-
     moveCount++;
+
+    if (shuffling == false) {
+      bool inOrder = isTileInOrder();
+      if (inOrder) {
+        gameStatus.isCompleted = true;
+        bestMoveCount = bestMoveCount > 0 && bestMoveCount < moveCount
+            ? bestMoveCount : moveCount;
+        notifyListeners();
+      }
+    }
+
     return true;
   }
 
-  // method is problematic
-  bool hasWonGame() { // TODO:: rename
+  // checks if tiles are in order
+  bool isTileInOrder() { // TODO:: double check algorithm
     int next = 1;
 
     for (int y = 0; y < tilePositions.length; y++) {
       for (int x = 0; x < tilePositions[y].length; x++) {
+        // if we have not finished counting loop and return false if tile is out
+        // of order
         if (next <= 15) {
+          // game is not complete, just exit
           if (tilePositions[y][x] == null) {
-            print('tile is null');
-            gameStatusText = '$moveCount move(s)';
             notifyListeners();
             return false;
           }
           else {
+            // check if current tile is increasing by one
             if (tilePositions[y][x].order == next++) {
-              print(tilePositions[y][x].order);
+              // print(tilePositions[y][x].order);
               continue;
             }
+            // current tile did not increase by one
             else {
-              gameStatusText = '$moveCount move(s)';
               notifyListeners();
               return false;
             }
           }
         }
+        // count finished without exiting, so tile has to be in order
         else {
-          gameStatus.isCompleted = true;
-          gameStatusText = 'You have won the game in $moveCount move(s)';
-          notifyListeners();
           return true;
         }
       }
     }
+    
+    return false;
   }
 
   void restartGame() {
@@ -278,7 +293,7 @@ class GameProvider with ChangeNotifier {
         x = emptyPosition.x;
       }
 
-      move(Position(x: x, y: y));
+      move(Position(x: x, y: y), shuffling: true);
     }
 
     moveCount = 0;

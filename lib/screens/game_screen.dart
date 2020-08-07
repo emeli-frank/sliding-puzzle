@@ -4,8 +4,6 @@ import 'package:number_sliding_puzzle/providers/game_provider.dart';
 import 'package:number_sliding_puzzle/ui_component/tile_widget.dart';
 import 'package:provider/provider.dart';
 
-final double boardWidth = 350.0;
-
 class GameScreen extends StatelessWidget {
   static final String routeName = 'gameScreen';
   final String title;
@@ -13,6 +11,14 @@ class GameScreen extends StatelessWidget {
   GameScreen({this.title});
   @override
   Widget build(BuildContext context) {
+    double deviceWidth = MediaQuery.of(context).size.width;
+    double boardWidth;
+
+    if (deviceWidth < 500) {
+      boardWidth = deviceWidth * 0.95;
+    } else {
+      boardWidth = 500;
+    }
     GameProvider gameProvider = Provider.of<GameProvider>(context);
 
     List<Widget> tiles = [];
@@ -24,12 +30,10 @@ class GameScreen extends StatelessWidget {
             boardWidth: boardWidth,
             position: Position(x: x, y: y),
           );
-          // print('tiles $widgetCurrentPosition');
           tiles.add(Positioned(
              left: widgetCurrentPosition['x'],
              top: widgetCurrentPosition['y'],
              child: GestureDetector(
-//               behavior: HitTestBehavior.translucent,
                child: Container(
                  width: boardWidth / 4,
                  height: boardWidth / 4,
@@ -38,11 +42,11 @@ class GameScreen extends StatelessWidget {
                  ),
                ),
                onTap: () {
-                 gameProvider.move(Position(x: x, y: y), playSound: true);
+                 gameProvider.move(Position(x: x, y: y));
                 /*if (gameProvider.hasWonGame() && !gameProvider.gameStatus.isCompleted) {
                   _neverSatisfied(context); // TODO:: remember this is an async method
                 }*/
-                gameProvider.hasWonGame();
+                // gameProvider.isTileInOrder();
                },
              ),
            ));
@@ -70,26 +74,54 @@ class GameScreen extends StatelessWidget {
                   Expanded(
                       flex: 1,
                       // child: SizedBox(width: 20.0)
-                    child: Center(
-                      child: Text(
-                        gameProvider.gameStatusText,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24.0,
-                          fontWeight: FontWeight.w700,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.0),
+                      /*child: Center(
+                        child: Text(
+                          gameProvider.gameStatusText,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
+                      ),*/
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.star),
+                              SizedBox(width: 8),
+                              Text(gameProvider.bestMoveCount == 0
+                                  ? "Best move count: None yet"
+                                  : "Best move count: " + gameProvider.bestMoveCount.toString(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.directions_walk),
+                              SizedBox(width: 8),
+                              Text(
+                                "Current move count: " + gameProvider.moveCount.toString(),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
                     ),
                   ),
                   Container(
-//                    flex: 4,
                     child: Container(
                       width: boardWidth,
                       height: boardWidth,
-                      decoration: BoxDecoration(
-                        // border: Border.all(width: 1.0),
-                        // color: Colors.black12,
-                      ),
                       // child: Center(child: Text('grid body')),
                       child: Stack(
                         children: tiles,
@@ -97,6 +129,7 @@ class GameScreen extends StatelessWidget {
                     ),
                   ),
                   Expanded(
+                    flex: 1,
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 10.0),
                       child: Row(
@@ -120,7 +153,6 @@ class GameScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    flex: 1,
                   ),
                 ],
               ),

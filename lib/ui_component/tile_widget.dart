@@ -11,55 +11,24 @@ class TileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var gameProvider = Provider.of<GameProvider>(context);
-
-    /*return FractionallySizedBox(
-      heightFactor: 0.25,
-      widthFactor: 0.25,
-      alignment: Alignment(alignment['x'], alignment['y']),
-      child: Container( // Align was used b4
-        // width: tileWidth,
-        // height: tileWidth,
-        *//*left: widgetCurrentPosition['x'],
-        top: widgetCurrentPosition['y'],*//*
-        child: GestureDetector(
-          child: Container(
-              margin: EdgeInsets.all(2.0),
-              decoration: BoxDecoration(
-              ),
-              child: Image.asset('assets/images/tiles/wood/tile_$label.png'),
-          ),
-          onTap: () {
-            gameProvider.move(currentPosition);
-          },
-        ),
-      ),
-    );*/
-
     return Container(
+      margin: EdgeInsets.all(2.0),
+      decoration: BoxDecoration(
+      ),
+      // child: Image.asset('assets/images/tiles/wood/tile_$order.png'),
       child: Container(
-        margin: EdgeInsets.all(2.0),
-        decoration: BoxDecoration(
-        ),
-        child: Image.asset('assets/images/tiles/wood/tile_$order.png'),
-      ),
-    );
-
-    return Container(
-      child: GestureDetector(
-        child: Container(
-          margin: EdgeInsets.all(2.0),
-          decoration: BoxDecoration(
+        child: Center(
+          child: Text(
+            order.toString(),
+            style: TextStyle(
+              fontSize: 36,
+            ),
           ),
-          child: Image.asset('assets/images/tiles/wood/tile_$order.png'),
         ),
-        onTap: () {
-          /*gameProvider.move(currentPosition, playSound: true);
-//          if (gameProvider.hasWonGame() && !gameProvider.gameStatus.isCompleted) {
-//            _neverSatisfied(context); // TODO:: remember this is an async method
-//          }
-          gameProvider.hasWonGame();*/
-        },
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(color: Colors.black, width: 1.5, style: BorderStyle.solid)
+        ),
       ),
     );
   }

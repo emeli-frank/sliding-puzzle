@@ -144,10 +144,10 @@ class GameScreen extends StatelessWidget {
                         ),
                           FlatButton.icon(
                             padding: EdgeInsets.symmetric(vertical: 20.0, horizontal:20.0),
-                            label: Text("Turn off sound"),
-                            icon: Icon(Icons.music_note),
+                            label: Text(gameProvider.playSound ? "Turn off sound" : "Turn on"),
+                            icon: Icon(gameProvider.playSound ? Icons.volume_off : Icons.volume_up),
                             onPressed: () {
-                              // gameProvider.toggleSound();
+                               gameProvider.toggleSound();
                             },
                           ),
                         ],

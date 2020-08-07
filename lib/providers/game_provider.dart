@@ -6,8 +6,10 @@ import 'package:number_sliding_puzzle/models/game_status.dart';
 import 'package:number_sliding_puzzle/models/position.dart';
 import 'package:number_sliding_puzzle/models/tile.dart';
 import 'dart:math';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GameProvider with ChangeNotifier {
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   List<List<Tile>> _tilePositions = [
     [],
     [],
@@ -18,8 +20,16 @@ class GameProvider with ChangeNotifier {
   String gameStatusText = '';
   int moveCount = 0;
   int bestMoveCount = 0;
+  bool _playSound = false;
 
   GameProvider() {
+    // init sound preference
+    _prefs.then((prefs) {
+      bool playSound = prefs.getBool('play_sound_key') ?? false;
+      _playSound = playSound;
+      prefs.setBool('play_sound_key', _playSound);
+    });
+
     // Create tiles and arrange them without shuffling yet
     for(int y = 0; y < _tilePositions.length; y ++) {
       for(int x = 0; x < _tilePositions.length; x ++) {
@@ -106,12 +116,10 @@ class GameProvider with ChangeNotifier {
     Position emptyPosition = getEmptyPosition();
     List<Position> positions = [];
 
-    /*final AudioCache player = AudioCache(prefix: 'sounds/');
-    if (shuffling == false) {
-      print("PRINTING PLAY SOUND");
-      print(playSound);
+    final AudioCache player = AudioCache(prefix: 'sounds/');
+    if (shuffling == false && _playSound == true) {
       player.play('pop.mp3');
-    }*/
+    }
 
     // return false if tile can't be moved
     if (_getMoveDirection(touchedTilePosition) == AxisDirection.nil) {
@@ -354,6 +362,18 @@ class GameProvider with ChangeNotifier {
     };
 
 
+  }
+
+  Future <void> toggleSound() async {
+    final SharedPreferences prefs = await _prefs;
+    bool playSound = prefs.getBool('play_sound_key') ?? false;
+    _playSound = !playSound;
+    prefs.setBool('play_sound_key', _playSound);
+    notifyListeners();
+  }
+
+  bool get playSound {
+    return _playSound;
   }
 }
 

@@ -15,25 +15,43 @@ class GameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     GameProvider gameProvider = Provider.of<GameProvider>(context);
 
-    List<TileWidget> tiles = [];
+    List<Widget> tiles = [];
 
     for (int y = 0; y < gameProvider.tilePositions.length; y++) {
       for (int x = 0; x < gameProvider.tilePositions[y].length; x++) {
         if (gameProvider.tilePositions[y][x] != null) {
-          // print('tiles ${gameProvider.tilePositions[y][x]}');
-           tiles.add(TileWidget(
-             currentPosition: Position(
-               x: x,
-               y: y,
+          Map<String, double> widgetCurrentPosition = gameProvider.getWidgetPosition(
+            boardWidth: boardWidth,
+            position: Position(x: x, y: y),
+          );
+          // print('tiles $widgetCurrentPosition');
+          tiles.add(Positioned(
+             left: widgetCurrentPosition['x'],
+             top: widgetCurrentPosition['y'],
+             child: GestureDetector(
+//               behavior: HitTestBehavior.translucent,
+               child: Container(
+                 width: boardWidth / 4,
+                 height: boardWidth / 4,
+                 child: TileWidget(
+                   order: gameProvider.tilePositions[y][x].order,
+                 ),
+               ),
+               onTap: () {
+                 gameProvider.move(Position(x: x, y: y), playSound: true);
+                /*if (gameProvider.hasWonGame() && !gameProvider.gameStatus.isCompleted) {
+                  _neverSatisfied(context); // TODO:: remember this is an async method
+                }*/
+                gameProvider.hasWonGame();
+               },
              ),
-             order: gameProvider.tilePositions[y][x].order,
-             boardWidth: boardWidth,
            ));
         }
       }
     }
 
     return Stack(
+//      alignment: Alignment.topLeft,
       children: <Widget>[
         Image.asset(
           "assets/images/game_background_images/smooth_turquoise.jpg",
@@ -43,18 +61,6 @@ class GameScreen extends StatelessWidget {
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          // backgroundColor: Colors.white12,
-          /*appBar: AppBar(
-          title: Text('Puzzle'),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.shuffle),
-              onPressed: () {
-                gameProvider.shuffleTiles();
-              },
-            ),
-          ],
-        ),*/
           body: SafeArea(
             child: Container(
               color: Colors.black12,
@@ -75,8 +81,8 @@ class GameScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Expanded(
-                    flex: 4,
+                  Container(
+//                    flex: 4,
                     child: Container(
                       width: boardWidth,
                       height: boardWidth,
@@ -87,19 +93,6 @@ class GameScreen extends StatelessWidget {
                       // child: Center(child: Text('grid body')),
                       child: Stack(
                         children: tiles,
-                        /*children: <Widget>[
-                        foo(0, 0, Colors.red),
-                        foo(0.1, 0.1, Colors.red),
-                        foo(0.2, 0.2, Colors.green),
-                        foo(0.3, 0.3, Colors.blue),
-                        foo(0.4, 0.4, Colors.black),
-                        foo(0.5, 0.5, Colors.grey),
-                        foo(0.6, 0.6, Colors.deepPurple),
-                        foo(0.7, 0.7, Colors.pink),
-                        foo(0.8, 0.8, Colors.brown),
-                        foo(0.9, 0.9, Colors.cyan),
-                        foo(1, 1.2, Colors.orange, width: 80),
-                      ],*/
                       ),
                     ),
                   ),

@@ -5,28 +5,13 @@ import 'package:provider/provider.dart';
 
 class TileWidget extends StatelessWidget {
   final int order;
-  final Position currentPosition;
-  final double boardWidth; // TODO:: get through provider
 
   TileWidget({
-    @required this.order,
-    @required this.currentPosition,
-    @required this.boardWidth});
+    @required this.order});
 
   @override
   Widget build(BuildContext context) {
-    final double tileWidth = boardWidth / 4;
-
-    // print(currentPosition);
-
     var gameProvider = Provider.of<GameProvider>(context);
-    // Map position = Position(boardWidth: boardWidth).getWidgetPosition(currentPosition);
-    Map<String, double> widgetCurrentPosition = gameProvider.getWidgetPosition(
-      boardWidth: boardWidth,
-      position: currentPosition,
-    );
-
-    var alignment = gameProvider.getAlignment(position: currentPosition);
 
     /*return FractionallySizedBox(
       heightFactor: 0.25,
@@ -51,27 +36,30 @@ class TileWidget extends StatelessWidget {
       ),
     );*/
 
-    return Positioned(
-      left: widgetCurrentPosition['x'],
-      top: widgetCurrentPosition['y'],
-      child: Container( // Align was used b4
-         width: tileWidth,
-         height: tileWidth,
-        child: GestureDetector(
-          child: Container(
-            margin: EdgeInsets.all(2.0),
-            decoration: BoxDecoration(
-            ),
-            child: Image.asset('assets/images/tiles/wood/tile_$order.png'),
-          ),
-          onTap: () {
-            gameProvider.move(currentPosition, playSound: true);
-            /*if (gameProvider.hasWonGame() && !gameProvider.gameStatus.isCompleted) {
-              _neverSatisfied(context); // TODO:: remember this is an async method
-            }*/
-            gameProvider.hasWonGame();
-          },
+    return Container(
+      child: Container(
+        margin: EdgeInsets.all(2.0),
+        decoration: BoxDecoration(
         ),
+        child: Image.asset('assets/images/tiles/wood/tile_$order.png'),
+      ),
+    );
+
+    return Container(
+      child: GestureDetector(
+        child: Container(
+          margin: EdgeInsets.all(2.0),
+          decoration: BoxDecoration(
+          ),
+          child: Image.asset('assets/images/tiles/wood/tile_$order.png'),
+        ),
+        onTap: () {
+          /*gameProvider.move(currentPosition, playSound: true);
+//          if (gameProvider.hasWonGame() && !gameProvider.gameStatus.isCompleted) {
+//            _neverSatisfied(context); // TODO:: remember this is an async method
+//          }
+          gameProvider.hasWonGame();*/
+        },
       ),
     );
   }

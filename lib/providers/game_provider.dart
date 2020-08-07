@@ -19,16 +19,19 @@ class GameProvider with ChangeNotifier {
   int moveCount = 0;
 
   GameProvider() {
-    // Create tiles and add them in order
+    // Create tiles and arrange them without shuffling yet
     for(int y = 0; y < _tilePositions.length; y ++) {
       for(int x = 0; x < _tilePositions.length; x ++) {
         _tilePositions[y].add(Tile(order: (y * 4) + (x + 1)));
       }
     }
 
+    // set the cell at the lowest rightmost corner to be empty
     _tilePositions[3][3] = null;
 
     gameStatus.isCompleted = false;
+
+    // shuffle tiles
     shuffleTiles();
   }
 
@@ -38,8 +41,11 @@ class GameProvider with ChangeNotifier {
     * This function can secondarily be used to find out if a tile can move
     */
 
-    List<Position> verticalPositions = []; // holds clicked tile including tiles at it's left and right
-    List<Position> horizontalPositions = []; // holds clicked tile including tiles at it's top and bottom
+    // holds clicked tile including tiles at it's left and right
+    List<Position> verticalPositions = [];
+
+    // holds clicked tile including tiles at it's top and bottom
+    List<Position> horizontalPositions = [];
 
     // add clicked tile including those at it's left and right to the horizontalPositions list
     for (int x = 0; x < 4; x++) {
@@ -99,8 +105,8 @@ class GameProvider with ChangeNotifier {
 
 //    final AudioCache player = AudioCache(prefix: 'sounds/');
 
+    // return false if tile can't be moved
     if (_getMoveDirection(touchedTilePosition) == AxisDirection.nil) {
-      // tile can't be moved
       return false;
     }
 
@@ -284,6 +290,7 @@ class GameProvider with ChangeNotifier {
     _tilePositions[empty.y][empty.x] = temp;
   }
 
+  // finds and returns the position of the empty cell on the board
   Position getEmptyPosition() {
     Position position;
 

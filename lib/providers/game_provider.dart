@@ -20,6 +20,7 @@ class GameProvider with ChangeNotifier {
   String gameStatusText = '';
   int moveCount = 0;
   int bestMoveCount = 0;
+  int lastGameMoveCount = 0;
   bool _playSound = false;
 
   GameProvider() {
@@ -110,6 +111,9 @@ class GameProvider with ChangeNotifier {
   // checks if a piece can move by trying to get it's move direction
   // and moving it if it can
   bool move(Position touchedTilePosition, {bool shuffling = false}) {
+    // todo:: this flag is used to signal widget to show game over dialog
+    // implement properly, they should be notified via stream or something
+    bool gameCompleted = false;
     if (gameStatus.isCompleted)
       return false;
 
@@ -219,11 +223,13 @@ class GameProvider with ChangeNotifier {
         gameStatus.isCompleted = true;
         bestMoveCount = bestMoveCount > 0 && bestMoveCount < moveCount
             ? bestMoveCount : moveCount;
+        lastGameMoveCount = moveCount;
+        gameCompleted = true;
         notifyListeners();
       }
     }
 
-    return true;
+    return gameCompleted;
   }
 
   // checks if tiles are in order
@@ -268,7 +274,8 @@ class GameProvider with ChangeNotifier {
     gameStatusText = "";
     moveCount = 0;
     shuffleTiles();
-    moveCount = 0; // todo:: correct this redundancy
+    moveCount = 0;
+    lastGameMoveCount = 0;
   }
 
   void shuffleTiles() {

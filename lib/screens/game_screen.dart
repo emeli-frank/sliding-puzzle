@@ -42,11 +42,10 @@ class GameScreen extends StatelessWidget {
                  ),
                ),
                onTap: () {
-                 gameProvider.move(Position(x: x, y: y));
-                /*if (gameProvider.hasWonGame() && !gameProvider.gameStatus.isCompleted) {
-                  _neverSatisfied(context); // TODO:: remember this is an async method
-                }*/
-                // gameProvider.isTileInOrder();
+                 bool completed = gameProvider.move(Position(x: x, y: y));
+                 if (completed == true) {
+                   _showDialog(context, gameProvider.lastGameMoveCount);
+                 }
                },
              ),
            ));
@@ -134,6 +133,14 @@ class GameScreen extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: 10.0),
                       child: Row(
                         children: <Widget>[
+                          /*FlatButton.icon(
+                            padding: EdgeInsets.symmetric(vertical: 20.0, horizontal:20.0),
+                            label: Text("Test"),
+                            icon: Icon(Icons.volume_up),
+                            onPressed: () {
+                              _showDialog(context, gameProvider.lastGameMoveCount);
+                            },
+                          ),*/
                           FlatButton.icon(
                             padding: EdgeInsets.symmetric(vertical: 20.0, horizontal:20.0),
                           label: Text("Restart"),
@@ -160,6 +167,34 @@ class GameScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  _showDialog(BuildContext context, int moveCount) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Game over'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Congratulations!'),
+                 Text('You arranged the tiles in $moveCount moves.'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
